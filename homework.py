@@ -6,7 +6,6 @@ import time
 import requests
 import telegram
 from dotenv import load_dotenv
-from telegram import Bot
 
 from exceptions import (APIStatusesException, HomeWorkStatusesException,
                         HomeWorkTypeError, TokenError)
@@ -83,8 +82,8 @@ def parse_status(homework):
     homework_status = homework['status']
     try:
         if homework_status not in HOMEWORK_STATUSES:
-            raise HomeWorkStatusesException(f'Статус не соответствует '
-                                            f'ожидаемому')
+            raise HomeWorkStatusesException('Статус не соответствует '
+                                            'ожидаемому')
     except HomeWorkStatusesException as error:
         logger.error(error)
     verdict = HOMEWORK_STATUSES[homework_status]
@@ -95,11 +94,11 @@ def check_tokens():
     """Checks API tokens."""
     try:
         if not PRACTICUM_TOKEN:
-            raise TokenError(f'Не удалось получить PRACTICUM_TOKEN')
+            raise TokenError('Не удалось получить PRACTICUM_TOKEN')
         if not TELEGRAM_TOKEN:
-            raise TokenError(f'Не удалось получить TELEGRAM_TOKEN')
+            raise TokenError('Не удалось получить TELEGRAM_TOKEN')
         if not TELEGRAM_CHAT_ID:
-            raise TokenError(f'Не удалось получить TELEGRAM_CHAT_ID')
+            raise TokenError('Не удалось получить TELEGRAM_CHAT_ID')
     except TokenError as error:
         logger.critical(error)
         return False
@@ -136,7 +135,7 @@ def main():
                 last_message = message
             time.sleep(RETRY_TIME)
         else:
-            logger.debug(f'Отправка повторного запроса после таймаута')
+            logger.debug('Отправка повторного запроса после таймаута')
 
 
 if __name__ == '__main__':
