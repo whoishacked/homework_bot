@@ -92,13 +92,15 @@ def parse_status(homework):
 
 def check_tokens():
     """Checks API tokens."""
+    tokens = {
+        'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
+        'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
+        'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
+    }
     try:
-        if not PRACTICUM_TOKEN:
-            raise TokenError('Не удалось получить PRACTICUM_TOKEN')
-        if not TELEGRAM_TOKEN:
-            raise TokenError('Не удалось получить TELEGRAM_TOKEN')
-        if not TELEGRAM_CHAT_ID:
-            raise TokenError('Не удалось получить TELEGRAM_CHAT_ID')
+        for token in tokens:
+            if not tokens[token]:
+                raise TokenError(f'Не удалось получить {token}')
     except TokenError as error:
         logger.critical(error)
         return False
