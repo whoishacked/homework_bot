@@ -71,8 +71,8 @@ def check_response(response):
         current_date = response['current_date']
     except KeyError:
         raise
-    if homeworks and isinstance(homeworks, Dict):
-        raise HomeWorkTypeError('Под ключем homeworks не словарь')
+    if current_date and homeworks and isinstance(homeworks, Dict):
+        raise HomeWorkTypeError('Под ключем не словарь')
     return homeworks
 
 
@@ -95,7 +95,7 @@ def check_tokens():
     tokens = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
     try:
         if not all(tokens):
-            raise TokenError(f'Не удалось получить токен')
+            raise TokenError('Не удалось получить токен')
     except TokenError:
         return False
     return True
