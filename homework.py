@@ -10,7 +10,7 @@ import telegram
 from dotenv import load_dotenv
 
 from exceptions import (APIStatusesException, HomeWorkStatusesException,
-                        HomeWorkTypeError, TokenError)
+                        HomeWorkTypeError)
 
 load_dotenv()
 

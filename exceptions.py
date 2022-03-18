@@ -14,11 +14,6 @@ class HomeWorkTypeError(Exception):
     pass
 
 
-class TokenError(Exception):
-    """Исключение, если возникли проблемы с токенами"""
-    pass
-
-
 class JsonError(Exception):
     """Исключение для ошибок при соединении с енд-поинт"""
     pass
