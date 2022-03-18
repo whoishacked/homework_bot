@@ -39,10 +39,13 @@ handler.setFormatter(formatter)
 
 def send_message(bot, message):
     """Sends messages in telegram chat."""
+    logger.info('Отправка сообщения в telegram')
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
     except Exception as error:
         raise Exception(f'Не удалось отправить сообщение: {error}')
+    else:
+        logger.info('Сообщение отправлено')
 
 
 def get_api_answer(current_timestamp):
@@ -53,36 +56,34 @@ def get_api_answer(current_timestamp):
     try:
         response = requests.get(ENDPOINT, **header_params)
     except Exception as error:
-        raise Exception(f'Ошибка соединения с енд-поинт: {error}')
+        raise Exception(f'Ошибка соединения с енд-поинт: {error}, '
+                        f'параметры: {header_params}')
     if response.status_code != HTTPStatus.OK:
         raise APIStatusesException(f'Неверный код ответа от API: '
                                    f'{response.status_code}')
     try:
         response = response.json()
-    except ValueError:
-        raise
+    except Exception as error:
+        raise Exception(f'Ошибка получения json: {error}')
     return response
 
 
 def check_response(response):
     """Checks API answer & return homeworks."""
-    try:
-        homeworks = response['homeworks']
-        current_date = response['current_date']
-    except KeyError:
-        raise
-    if current_date and homeworks and isinstance(homeworks, Dict):
-        raise HomeWorkTypeError('Под ключем не словарь')
+    if 'homeworks' not in response or 'current_date' not in response:
+        raise KeyError('Отсутсвуют нужные ключи в response')
+    homeworks = response['homeworks']
+    if isinstance(homeworks, Dict):
+        raise HomeWorkTypeError('Под ключем homeworks не dict')
     return homeworks
 
 
 def parse_status(homework):
     """Extracts homework's information & status."""
-    try:
-        homework_name = homework['homework_name']
-        homework_status = homework['status']
-    except KeyError:
-        raise
+    if 'homework_name' not in homework or 'status' not in homework:
+        raise KeyError('Отсутсвуют нужные ключи в homework')
+    homework_name = homework['homework_name']
+    homework_status = homework['status']
     if homework_status not in HOMEWORK_VERDICTS:
         raise HomeWorkStatusesException('Статус не соответствует '
                                         'ожидаемому')
@@ -92,21 +93,13 @@ def parse_status(homework):
 
 def check_tokens():
     """Checks API tokens."""
-    tokens = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
-    try:
-        if not all(tokens):
-            raise TokenError('Не удалось получить токен')
-    except TokenError:
-        return False
-    return True
+    return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
 
 
 def main():
     """Основная логика работы бота."""
-    try:
-        check_tokens()
-    except Exception as error:
-        logger.critical(error)
+    if not check_tokens():
+        logger.critical('Один из токенов недоступен. Завершение работы.')
         sys.exit(0)
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
@@ -118,9 +111,7 @@ def main():
             if homeworks:
                 message = parse_status(homeworks[0])
                 if last_message != message:
-                    logger.info('Отправка сообщения в telegram')
                     send_message(bot, message)
-                    logger.info('Сообщение отправлено')
                     last_message = message
             else:
                 logger.debug(f'Новых статусов нет. Перепроверка через '
@@ -130,9 +121,7 @@ def main():
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
             if last_message != message:
-                logger.info('Отправка сообщения в telegram')
                 send_message(bot, message)
-                logger.info('Сообщение отправлено')
                 last_message = message
         else:
             logger.debug('Отправка повторного запроса после таймаута')
