@@ -19,7 +19,7 @@ PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 RETRY_TIME = 600
-ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
+ENDPOINT = os.getenv('ENDPOINT_URL')
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 HOMEWORK_VERDICTS = {
     'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
@@ -70,10 +70,8 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Checks API answer & return homeworks."""
-    # Эту проверку пришлось закомментировать, иначе не проходит тесты:
-    # https://yandex-students.slack.com/archives/C02JX4L7HJP/p1645889180360039
-    # if 'homeworks' not in response or 'current_date' not in response:
-    #    raise KeyError('Отсутсвуют нужные ключи в response')
+    if 'homeworks' not in response or 'current_date' not in response:
+        raise KeyError('Отсутсвуют нужные ключи в response')
     homeworks = response['homeworks']
     if isinstance(homeworks, Dict):
         raise HomeWorkTypeError('Под ключем homeworks не dict')
